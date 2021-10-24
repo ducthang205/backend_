@@ -15,6 +15,7 @@ class CreateRecord(BaseModel):
 
 class ConditionRecord(BaseModel):
     id: str
+    key: str
     price: str
     vol: str
 

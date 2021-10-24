@@ -18,6 +18,7 @@ condition = Table(
     "condition",
     meta,
     Column("id", Integer, primary_key=True, autoincrement=1),
+    Column("key", String(255)),
     Column("price", String(255), ),
     Column("vol", String(255)),
 

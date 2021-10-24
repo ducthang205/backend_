@@ -26,16 +26,16 @@ def get_data():
     rs = _conn.execute('SELECT * FROM records ORDER BY id DESC LIMIT 1')
     for row in rs:
         last.append(row)
-    print(last[0])
+    # print(last[0])
     list = []
     rs = _conn.execute('SELECT * FROM condition ORDER BY id DESC LIMIT 1')
 
     for row in rs:
         list.append(row)
 
-    print(list[0])
-    price_check = int(list[0][1].replace(",", ""))
-    vol_check = int(list[0][2].replace(",", ""))
+    # print(list[0])
+    price_check = int(list[0][2].replace(",", ""))
+    vol_check = int(list[0][3].replace(",", ""))
     driver = webdriver.Chrome(ChromeDriverManager().install())
     # driver.minimize_window()
     user = "supergalaxy205@gmail.com"
@@ -95,7 +95,7 @@ def get_data():
                 density = driver.find_element(By.XPATH,
                                               "//*[@id=\"deal-content\"]/div/div/div[2]/div/table/tbody/tr[" + str(
                                                   i + 1) + "]/td[4]")
-                if int(price.text.replace(",", "")) > price_check and int(vol.text.replace(",", "")) > vol:
+                if int(price.text.replace(",", "")) > price_check and int(vol.text.replace(",", "")) > vol_check:
                     send_mail()
                 value = {"id": 0, "time": time.text, "price": price.text, "change": change.text, "per": per.text,
                          "vol": vol.text,
@@ -123,4 +123,4 @@ def get_data():
     return data
 
 
-real_time()
+

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from sqlalchemy import create_engine
+from sqlalchemy.sql.expression import false, true
 from starlette.middleware.cors import CORSMiddleware
 
 from database import engine
@@ -24,33 +25,49 @@ app.add_middleware(
 )
 
 
-@app.post("/get_record/{page}/{limit}", tags=["records"])
-async def get_record(page: int, limit: int):
+@app.get("/get_record", tags=["records"])
+async def get_record(page: int = 1, limit: int = 20):
+    print("page: ", page, " limit: ", limit)
     with engine.connect() as con:
         print(con)
         rs = con.execute('SELECT * FROM records ORDER BY id DESC ')
-        list = []
+        rowcount = con.execute("select count(*) from records")  
+        total = rowcount.fetchone()[0]
+        print(total)
+        records = []
         i = 0
 
         for row in rs:
             print()
             if i < (page - 1) * limit: continue
             if i > page * limit - 1: break
-            list.append(row)
+            records.append(row)
             i = i + 1
         rs.close()
-    return list
+
+    return {
+        "data": records,
+        "paging": {
+            "total": total,
+            "page": page,
+            "limit": limit
+        }
+    }
 
 
-@app.put(
-    "/set_condition/{key}/{price}/{vol}", tags=["conditions"]
+@app.post(
+    "/set_condition", tags=["conditions"]
 )
-async def set_condition(con: ConditionRecord, key: str, price: int, vol: int):
+async def set_condition(con: ConditionRecord):
     _engine = create_engine("sqlite:///./sql_app.db")
     _conn = engine.connect()
-    _conn.execute("INSERT INTO condition (key, price, vol) VALUES (:key, :price, :vol)", key=key,price=price, vol=vol)
-    rs = _conn.execute('SELECT * FROM condition ORDER BY id DESC LIMIT 1')
-    print(rs)
+    try:
+        _conn.execute("INSERT INTO condition (key, price, vol) VALUES (:key, :price, :vol)", key=con.key,price=con.price, vol=con.vol)
+        rs = _conn.execute('SELECT * FROM condition ORDER BY id DESC LIMIT 1')
+        print(rs)
+        return {"success" : 1}
+    except:
+        return {"success" : 0}
 
 
 @app.get("/get_condition", tags=["conditions"])

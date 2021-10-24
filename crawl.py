@@ -7,27 +7,32 @@ from sqlalchemy import create_engine
 from webdriver_manager.chrome import ChromeDriverManager
 from time import sleep
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 engine = create_engine("sqlite:///./sql_app.db")
 
 
 def send_mail(value):
-    print("send mail")
     sender_email = "ducthang.nguyen205@gmail.com"
-    rec_email = "supergalaxy205@gmail.com"
+    rec_email = "trinhtrang27112000@gmail.com"
     password = "thangytbg"
-    message = "Mã chứng khoán của bạn đã yêu cầu. Thông tin là thời gian: " + value["time"] + " giá: " + value["price"]
-    mes = message.encode("utf-8")
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
     try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = rec_email
+        msg['Subject'] = "No reply"
+        body = "Mã chứng khoán của bạn đã yêu cầu. Thông tin là thời gian: " + value["time"] + " giá: " + value["price"]
+        msg.attach(MIMEText(body, 'plain'))
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
         server.login(sender_email, password)
         print("Login success")
-        server.sendmail(sender_email, rec_email, mes)
+        text = msg.as_string()
+        server.sendmail(sender_email, rec_email, text)
         print("Email has been sent to ", rec_email)
     except:
         print("Message wasn't sent to ", rec_email)
-
 
 def real_time():
     while 1 == 1:
